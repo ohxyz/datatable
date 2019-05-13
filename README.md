@@ -1,5 +1,5 @@
 # Datatable
-Datatable with sorting capacity in React
+Datatable with sorting functionality in React
 
 # Example
 ```
@@ -37,4 +37,4 @@ ReactDOM.render(
 ```
 
 # Origin
-Forked from 
+Forked from https://github.com/ohxyz/grid

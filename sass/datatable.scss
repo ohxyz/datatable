@@ -1,7 +1,10 @@
 .datatable {
     
-    border: 1px solid #cccccc;
+    &__table {
 
+        border: 1px solid #cccccc;
+    }
+    
     &__header {
 
         width: 100%;
@@ -91,5 +94,11 @@
     &--sort-desc:before {
 
         border-top-color: #333333;
+    }
+
+    &__addons {
+
+        display: flex;
+        margin-top: 10px;
     }
 }

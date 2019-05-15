@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Column } from './column.js';
-import '../sass/datatable.scss';
+import { Pagination } from './pagination.js';
+import '../sass/main.scss';
 
 const SORT_ASC = 1;
 const SORT_DESC = -1;
@@ -16,19 +17,28 @@ class Datatable extends React.Component {
         this.sortSettings = {
 
             prop: '',
-            order: 0
+            order: SORT_NONE
         };
+
+        this.items = this.props.items;
 
         this.state = {
 
-            items: this.props.items.map( item => Object.assign( {}, item ) ),
-            sortClassName: ''
+            items: this.items.slice( 0, this.props.itemsPerPage[0] ),
+            sortClassName: '',
+            numberPerPage: this.props.itemsPerPage[0],
+            activePage: 1,
         };
     }
 
-    makeClassNameByPrefix( text ) {
+    makeClassName( text ) {
 
         return this.props.classNamePrefix + '__' + text;
+    }
+
+    getItemsByPageNumber( pageNumber, itemsPerPage ) {
+
+        return this.items.slice( (pageNumber - 1) * itemsPerPage, pageNumber * itemsPerPage )
     }
 
     handleHeaderCellClick( propName ) {
@@ -70,23 +80,27 @@ class Datatable extends React.Component {
         }
 
         this.sortSettings.prop = propName;
-
-        let items = this.props.items.map( item => Object.assign( {}, item ) );
+        this.items = this.props.items.slice();
 
         if ( this.sortSettings.order !== 0 ) {
 
-            items.sort( ( item1, item2 ) => { 
+            this.items.sort( ( item1, item2 ) => { 
 
                 let v1 = item1[ propName ] === undefined ? '' : item1[ propName ].toString();
                 let v2 = item2[ propName ] === undefined ? '' : item2[ propName ].toString();
 
-                return ( v1 < v2 ? -1 : ( v1 > v2 ? 1 : 0 ) ) * this.sortSettings.order;
+                if ( v1 === v2 ) {
+
+                    return 0;
+                }
+
+                return ( v1 < v2 ? -1 : 1 ) * this.sortSettings.order;
             } );
         }
 
         this.setState( { 
 
-            items: items,
+            items: this.getItemsByPageNumber( this.state.activePage, this.state.numberPerPage ),
             sortClassName: sortClassName
         } );
     }
@@ -101,23 +115,32 @@ class Datatable extends React.Component {
         this.props.onRowCellClick( content );
     }
 
+    handlePageClick( pageNumber ) {
+
+        this.setState( {
+
+            items: this.getItemsByPageNumber( pageNumber, this.state.numberPerPage ),
+            activePage: pageNumber
+        } )
+    }
+
     renderCell( content, title ) {
 
-        return  <span className={ this.makeClassNameByPrefix( 'cell-content' ) } >
+        return  <span className={ this.makeClassName( 'cell-content' ) } >
                     { content }
                 </span>
     }
 
     renderRow( object, index ) {
 
-        return  <div className={ this.makeClassNameByPrefix( 'row' ) } 
+        return  <div className={ this.makeClassName( 'row' ) } 
                      key={ index } 
                      onClick={ () => this.handleRowClick( object ) } 
                 >
                 {
                     this.props.cols.map( col =>
 
-                        <span className={ this.makeClassNameByPrefix( 'body-cell' ) } 
+                        <span className={ this.makeClassName( 'body-cell' ) } 
                               key={ col.prop }
                         >
                         { 
@@ -131,8 +154,8 @@ class Datatable extends React.Component {
 
     renderHeader() {
         
-        let classNameOfHeader = this.makeClassNameByPrefix( 'header' );
-        let classNameOfCell = this.makeClassNameByPrefix( 'header-cell' );
+        let classNameOfHeader = this.makeClassName( 'header' );
+        let classNameOfCell = this.makeClassName( 'header-cell' );
         let classNameOfCellOnSort = `${classNameOfCell} ${this.state.sortClassName}`;
 
         let columnDefs = this.props.cols;
@@ -151,7 +174,7 @@ class Datatable extends React.Component {
                                       onClick={ () => this.handleHeaderCellClick( column.prop ) }
                                 >
                                     <span
-                                        className={ this.makeClassNameByPrefix( 'cell-content' ) }
+                                        className={ this.makeClassName( 'cell-content' ) }
                                     >
                                          { column.name }
                                     </span>
@@ -163,7 +186,7 @@ class Datatable extends React.Component {
 
     renderBody() {
 
-        return  <div className={ this.makeClassNameByPrefix( 'body' ) }>
+        return  <div className={ this.makeClassName( 'body' ) }>
                 {
                     this.state.items.map( ( item, index ) => this.renderRow( item, index ) )
                 }
@@ -172,15 +195,66 @@ class Datatable extends React.Component {
 
     renderFooter() {
 
-        return  <div className={ this.makeClassNameByPrefix( 'footer' ) }></div>
+        return  <div className={ this.makeClassName( 'footer' ) }></div>
+    }
+
+
+    handlePerPageChange( event ) {
+
+        let numberPerPage =  parseInt(event.target.value);
+        let items = this.getItemsByPageNumber( this.state.activePage, numberPerPage );
+        let totalPages = Math.ceil( this.items.length / numberPerPage );
+        let activePage = this.state.activePage;
+
+        if ( items.length === 0 ) {
+
+            items = this.getItemsByPageNumber( totalPages, numberPerPage );
+            activePage = totalPages;
+        }
+
+        this.setState( { 
+
+            items: items,
+            numberPerPage: numberPerPage,
+            activePage: activePage,
+        } );
+    }
+
+    renderItemsPerPage() {
+
+        return  <div className={ this.makeClassName( 'per-page' ) }>
+                    <select onChange={ this.handlePerPageChange.bind(this) } >
+                    {
+                        this.props.itemsPerPage.map( num =>
+
+                            <option key={num} value={num} >{num}</option> 
+                        )
+                    }
+                    </select>
+                </div>
+    }
+
+    renderPagination() {
+
+        return  <Pagination totalItems={ this.props.items.length }
+                            itemsPerPage={ this.state.numberPerPage }
+                            activePage={ this.state.activePage }
+                            onPageClick={ this.handlePageClick.bind(this) } 
+                />
     }
 
     render() {
 
         return  <div className={ this.props.classNamePrefix } >
-                    { this.renderHeader() }
-                    { this.renderBody() }
-                    { this.renderFooter() }
+                    <div className={ this.makeClassName( 'table' ) }>
+                        { this.renderHeader() }
+                        { this.renderBody() }
+                        { this.renderFooter() }
+                    </div>
+                    <div className={ this.makeClassName( 'addons' ) }>
+                        { this.renderItemsPerPage() }
+                        { this.renderPagination() }
+                    </div>
                 </div>
 
     }
@@ -192,6 +266,7 @@ Datatable.defaultProps = {
     cols: [],
     classNamePrefix: 'datatable',
     shouldEnableSort: true,
+    itemsPerPage: [ 10, 20, 30 ],
     onRowClick: () => {}
 };
 
@@ -201,6 +276,7 @@ Datatable.propTypes = {
     cols: PropTypes.array,
     classNamePrefix: PropTypes.string,
     shouldEnableSort: PropTypes.bool,
+    itemsPerPage: PropTypes.array,
     onRowClick: PropTypes.func
 };
 

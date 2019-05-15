@@ -1,0 +1,21 @@
+.pagination {
+
+    user-select: none;
+
+    &__page {
+
+        padding: 2px 4px;
+        cursor: pointer;
+        display: inline-block;
+
+        &--active {
+
+            background-color: #dddddd;
+        }
+
+        &:hover {
+
+            background-color: #eeeeee;
+        }
+    }
+}

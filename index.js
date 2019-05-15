@@ -1,3 +1,3 @@
-const { Grid } = require( './lib/grid.js' );
+const { Datatable } = require( './lib/datatable.js' );
 
-module.exports = { Grid };
+module.exports = { Datatable };

@@ -30,7 +30,7 @@ ReactDOM.render(
     <Datatable classNamePrefix="datatable"
                items={ persons } 
                cols={ colDefs }
-               numPerPage={ 20 }
+               itemsPerPage={ [ 15, 25, 75, 175, 500, 800 ] }
     />,
     document.getElementById('container')
 );

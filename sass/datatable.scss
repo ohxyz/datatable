@@ -100,5 +100,12 @@
 
         display: flex;
         margin-top: 10px;
+
+        .pagination {
+
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+        }
     }
 }

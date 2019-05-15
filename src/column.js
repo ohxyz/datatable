@@ -1,5 +1,5 @@
 /**
- * Column defines the columns of the grid
+ * Column defines the columns of the datatable
  */
 
 class Column {

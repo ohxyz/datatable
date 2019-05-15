@@ -220,6 +220,13 @@ class Datatable extends React.Component {
         } );
     }
 
+    renderMessage() {
+
+        return  <div className={ this.makeClassName( 'message' ) }>
+                    Showing { this.state.items.length } items
+                </div>
+    }
+
     renderItemsPerPage() {
 
         return  <div className={ this.makeClassName( 'per-page' ) }>
@@ -252,8 +259,9 @@ class Datatable extends React.Component {
                         { this.renderFooter() }
                     </div>
                     <div className={ this.makeClassName( 'addons' ) }>
-                        { this.renderItemsPerPage() }
+                        { this.renderMessage() }
                         { this.renderPagination() }
+                        { this.renderItemsPerPage() }
                     </div>
                 </div>
 
@@ -266,7 +274,7 @@ Datatable.defaultProps = {
     cols: [],
     classNamePrefix: 'datatable',
     shouldEnableSort: true,
-    itemsPerPage: [ 10, 20, 30 ],
+    itemsPerPage: [ 10 ],
     onRowClick: () => {}
 };
 
